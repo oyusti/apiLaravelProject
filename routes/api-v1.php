@@ -19,4 +19,4 @@ Route::get('users', [UserController::class, 'index'])->name('api.v1.user.index')
 //Rutas para el CRUD de categorias
 Route::apiResource('categories', CategoryController::class)->names('api.v1.categories');
 //Rutas para el CRUD de posts
-Route::apiResource('posts', PostController::class)->names('api.v1.posts');
+Route::apiResource('posts', PostController::class)->names('api.v1.posts')->middleware('auth:api')->except('index', 'show');

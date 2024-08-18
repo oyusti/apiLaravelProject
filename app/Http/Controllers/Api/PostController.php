@@ -27,16 +27,19 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        return auth()->user();
         //return $request->all();
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:posts',
             'extract' => 'required|string',
             'body' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'user_id' => 'required|exists:users,id',
         ]);
-        $post = Post::create($request->all());
+
+        $user = auth()->user();
+        $data['user_id'] = $user->id;
+        $post = Post::create($data);
         return new PostResource($post);
     }
 
