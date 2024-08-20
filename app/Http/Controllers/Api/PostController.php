@@ -27,7 +27,6 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        return auth()->user();
         //return $request->all();
         $data = $request->validate([
             'title' => 'required|string|max:255',
