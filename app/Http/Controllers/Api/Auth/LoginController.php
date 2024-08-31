@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Http\Resources\UserResource;
@@ -25,7 +25,14 @@ class LoginController extends Controller
                 'message' => 'Estas credenciales no coinciden con nuestros registros']
                 , 404);
         }else{
-            return UserResource::make($user);
+            $userResource = UserResource::make($user);
+            //create token with sanctum
+            $token = $user->createToken($user->email)->plainTextToken;
+            return response()->json([
+                'user' => $userResource,
+                'token' => $token
+            ], 200);
+            //return response()->json($userResource, 200);
         }
     }
 }
