@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -22,9 +22,11 @@ class RegisterController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        $token = $user->createToken($user->email)->plainTextToken;
+
         return response()->json([
-            'message' => 'User created successfully',
             'user' => $user,
+            'token' => $token,
         ], 201);
     }
 }

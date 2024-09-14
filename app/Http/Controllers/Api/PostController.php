@@ -6,9 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Resources\PostResource;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Gate;
 
-class PostController extends Controller
+class PostController extends Controller implements HasMiddleware
 {
+
+    public static function middleware()
+    {
+        return [
+            new Middleware('auth:sanctum', except: ['index', 'show'])
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -33,8 +44,10 @@ class PostController extends Controller
             'slug' => 'required|string|unique:posts',
             'extract' => 'required|string',
             'body' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categories,id', 
         ]);
+
+        /* return $data; */
 
         $user = auth()->user();
         $data['user_id'] = $user->id;
@@ -56,16 +69,17 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        $request->validate([
+        //utilizamos el metodo authorize de la clase Gate para verificar si el usuario puede modificar el post
+        Gate::authorize('modify', $post);
+
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:posts,slug,' . $post->id,
             'extract' => 'required|string',
             'body' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'user_id' => 'required|exists:users,id',
         ]);
-
-        $post->update($request->all());
+        $post->update($data);
         return new PostResource($post);
     }
 
@@ -74,6 +88,9 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        //utilizamos el metodo authorize de la clase Gate para verificar si el usuario puede modificar el post
+        Gate::authorize('modify', $post);
+        
         $post->delete();
         return new PostResource($post);
     }
