@@ -22,8 +22,10 @@ class LoginController extends Controller
         //Verificamos que el usuario exista y que la contraseña sea correcta
         if(!$user || !Hash::check($request->password, $user->password)){
             return response()->json([
-                'message' => 'Estas credenciales no coinciden con nuestros registros']
-                , 404);
+                'errors' => [
+                    'email' => ['Las credenciales proporcionadas son incorrectas']
+                ]
+            ], 422);
         }else{
             $userResource = UserResource::make($user);
             //create token with sanctum
