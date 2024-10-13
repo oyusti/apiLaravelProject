@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Resources\PostResource;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Gate;
@@ -88,10 +89,20 @@ class PostController extends Controller implements HasMiddleware
      */
     public function destroy(Post $post)
     {
-        //utilizamos el metodo authorize de la clase Gate para verificar si el usuario puede modificar el post
-        Gate::authorize('modify', $post);
-        
-        $post->delete();
-        return new PostResource($post);
+        try{
+            //utilizamos el metodo authorize de la clase Gate para verificar si el usuario puede modificar el post
+            Gate::authorize('modify', $post);
+            $post->delete();
+            return new PostResource($post);
+        }catch(AuthorizationException $e){
+            return response()->json([
+                'message' => 'No tienes permiso para eliminar este post'
+            ],403);
+        }catch(\Exception $e){
+            return response()->json([
+                'message'   => 'Ocurrio un error al eliminar el post',
+                'error'     => $e->getMessage()
+            ],500);
+        }
     }
 }
